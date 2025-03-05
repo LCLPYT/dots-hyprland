@@ -50,7 +50,7 @@
     "Trim home manager generations to 5": "Trim home manager generations to 5",
     "Remove orphan packages": "Remove orphan packages",
     "Uninstall unused flatpak packages": "Uninstall unused flatpak packages",
-    "<span strikethrough=\"true\">Inaccurate</span> Color picker": "<span strikethrough=\"true\">Inaccurate</span> Color picker",
+    "<span strikethrough=\"true\">Inaccurate</span> Color picker": "Color picker",
     "Result": "Result",
     "Type to search": "Type to search",
     "illogical-impulse": "illogical-impulse",
