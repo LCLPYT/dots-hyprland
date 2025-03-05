@@ -25,6 +25,10 @@ const userConfigOptions = {
             },
         },
     },
+    'time': {
+        'dateFormatLong': "%A, %d.%m.", // On bar
+        'dateFormat': "%d.%m.", // On notif time
+    },
 }
 
 export default userConfigOptions;
