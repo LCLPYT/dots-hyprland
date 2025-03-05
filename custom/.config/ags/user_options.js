@@ -15,8 +15,16 @@ const userConfigOptions = {
         'enableFeatures': {
             'aiSearch': false,
             'webSearch': false,
-        }
-    }
+        },
+    },
+    'sidebar': {
+        'pages': {
+            'order': ['tools'],
+            'apis': {
+                'order': ['gpt'],
+            },
+        },
+    },
 }
 
 export default userConfigOptions;
