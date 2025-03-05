@@ -3,11 +3,12 @@ Install custom hyprland config:
 
 ```bash
 cp custom/.config/hypr/custom/* ~/.config/hypr/custom/
+cp custom/.config/ags/user_options.js ~/.config/ags/user_options.js
 ```
 
 Also patch `~/.config/hypr/hyprland.conf` as follows:
 
-```patch
+```diff
 --- .config/hypr/hyprland.conf	2025-03-05 17:31:18.740978568 +0100
 +++ /home/lukas/.config/hypr/hyprland.conf	2025-03-05 20:41:06.501671646 +0100
 @@ -5,7 +5,7 @@
