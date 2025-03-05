@@ -17,3 +17,6 @@ cp custom/.config/ags/user_options.js ~/.config/ags/user_options.js
 sed -i '/^source=~\/.config\/hypr\/hyprland\/rules.conf/ s|^|# |' ~/.config/hypr/hyprland.conf
 grep -qxF 'source=~/.config/hypr/custom/upstream-rules.conf' ~/.config/hypr/hyprland.conf || sed -i '/source=~\/.config\/hypr\/custom\/rules.conf/i source=~/.config/hypr/custom/upstream-rules.conf' ~/.config/hypr/hyprland.conf
 ```
+
+Then reboot and login with your user.
+Next, press Ctrl+Super+T and select a wallpaper for everything to work.
