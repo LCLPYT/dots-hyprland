@@ -13,7 +13,7 @@ export default Scrollable({
         className: 'spacing-v-10',
         children: [
             // QuickScripts(),
-            Conversions(),
+            // Conversions(),
             ColorPicker(),
             Box({ vexpand: true }),
             Name(),
