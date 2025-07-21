@@ -8,4 +8,5 @@
 # Ignore Python cache files
 __pycache__/
 *.py[cod]
+.config/quickshell/ii/.qmlls.ini
 .idea/
