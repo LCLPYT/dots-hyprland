@@ -14,6 +14,30 @@ import Quickshell.Hyprland
 Scope {
     id: root
     property var focusedScreen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)
+    property bool packageManagerRunning: false
+    property bool downloadRunning: false
+
+    component DescriptionLabel: Rectangle {
+        id: descriptionLabel
+        property string text
+        property color textColor: Appearance.colors.colOnTooltip
+        color: Appearance.colors.colTooltip
+        clip: true
+        radius: Appearance.rounding.normal
+        implicitHeight: descriptionLabelText.implicitHeight + 10 * 2
+        implicitWidth: descriptionLabelText.implicitWidth + 15 * 2
+
+        Behavior on implicitWidth {
+            animation: Appearance.animation.elementMove.numberAnimation.createObject(this)
+        }
+
+        StyledText {
+            id: descriptionLabelText
+            anchors.centerIn: parent
+            color: descriptionLabel.textColor
+            text: descriptionLabel.text
+        }
+    }
 
     function closeAllWindows() {
         HyprlandData.windowList.map(w => w.pid).forEach((pid) => {
@@ -21,15 +45,44 @@ Scope {
         });
     }
 
+    function detectRunningStuff() {
+        packageManagerRunning = false;
+        downloadRunning = false;
+        detectPackageManagerProc.running = false;
+        detectPackageManagerProc.running = true;
+        detectDownloadProc.running = false;
+        detectDownloadProc.running = true;
+    }
+
+    Process {
+        id: detectPackageManagerProc
+        command: ["pidof", "pacman", "yay", "paru", "dnf", "zypper", "apt", "apx", "xbps", "flatpak", "snap", "apk",
+            "yum", "epsi", "pikman"]
+        onExited: (exitCode, exitStatus) => {
+            root.packageManagerRunning = (exitCode === 0);
+        }
+    }
+
+    Process {
+        id: detectDownloadProc
+        command: ["bash", "-c", "pidof curl wget aria2c yt-dlp || ls ~/Downloads | grep -E '\.crdownload$|\.part$'"]
+        onExited: (exitCode, exitStatus) => {
+            root.downloadRunning = (exitCode === 0);
+        }
+    }
+
     Loader {
         id: sessionLoader
-        active: false
+        active: GlobalStates.sessionOpen
+        onActiveChanged: {
+            if (sessionLoader.active) root.detectRunningStuff();
+        }
 
         Connections {
             target: GlobalStates
             function onScreenLockedChanged() {
                 if (GlobalStates.screenLocked) {
-                    sessionLoader.active = false;
+                    GlobalStates.sessionOpen = false;
                 }
             }
         }
@@ -40,9 +93,8 @@ Scope {
             property string subtitle
             
             function hide() {
-                sessionLoader.active = false
+                GlobalStates.sessionOpen = false;
             }
-    
 
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.namespace: "quickshell:session"
@@ -68,6 +120,7 @@ Scope {
             }
 
             ColumnLayout { // Content column
+                id: contentColumn
                 anchors.centerIn: parent
                 spacing: 15
 
@@ -182,27 +235,39 @@ Scope {
                     }
                 }
 
-                Rectangle {
+                DescriptionLabel {
                     Layout.alignment: Qt.AlignHCenter
-                    radius: Appearance.rounding.normal
-                    implicitHeight: sessionSubtitle.implicitHeight + 10 * 2
-                    implicitWidth: sessionSubtitle.implicitWidth + 15 * 2
-                    color: Appearance.colors.colTooltip
-                    clip: true
-
-                    Behavior on implicitWidth {
-                        animation: Appearance.animation.elementMove.numberAnimation.createObject(this)
-                    }
-
-                    StyledText {
-                        id: sessionSubtitle
-                        anchors.centerIn: parent
-                        color: Appearance.colors.colOnTooltip
-                        text: sessionRoot.subtitle
-                    }
+                    text: sessionRoot.subtitle
                 }
             }
 
+            RowLayout {
+                anchors {
+                    top: contentColumn.bottom
+                    topMargin: 10
+                    horizontalCenter: contentColumn.horizontalCenter
+                }
+                spacing: 10
+
+                Loader {
+                    active: root.packageManagerRunning
+                    visible: active
+                    sourceComponent: DescriptionLabel {
+                        text: Translation.tr("Your package manager is running")
+                        textColor: Appearance.m3colors.m3onErrorContainer
+                        color: Appearance.m3colors.m3errorContainer
+                    }
+                }
+                Loader {
+                    active: root.downloadRunning
+                    visible: active
+                    sourceComponent: DescriptionLabel {
+                        text: Translation.tr("There might be a download in progress")
+                        textColor: Appearance.m3colors.m3onErrorContainer
+                        color: Appearance.m3colors.m3errorContainer
+                    }
+                }
+            }
         }
     }
 
@@ -210,15 +275,15 @@ Scope {
         target: "session"
 
         function toggle(): void {
-            sessionLoader.active = !sessionLoader.active;
+            GlobalStates.sessionOpen = !GlobalStates.sessionOpen;
         }
 
         function close(): void {
-            sessionLoader.active = false;
+            GlobalStates.sessionOpen = false
         }
 
         function open(): void {
-            sessionLoader.active = true;
+            GlobalStates.sessionOpen = true
         }
     }
 
@@ -227,7 +292,7 @@ Scope {
         description: "Toggles session screen on press"
 
         onPressed: {
-            sessionLoader.active = !sessionLoader.active;
+            GlobalStates.sessionOpen = !GlobalStates.sessionOpen;
         }
     }
 
@@ -236,7 +301,16 @@ Scope {
         description: "Opens session screen on press"
 
         onPressed: {
-            sessionLoader.active = true;
+            GlobalStates.sessionOpen = true
+        }
+    }
+
+    GlobalShortcut {
+        name: "sessionClose"
+        description: "Closes session screen on press"
+
+        onPressed: {
+            GlobalStates.sessionOpen = false
         }
     }
 

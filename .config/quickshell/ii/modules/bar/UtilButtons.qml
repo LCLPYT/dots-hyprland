@@ -1,3 +1,4 @@
+import qs
 import qs.modules.common
 import qs.modules.common.widgets
 import QtQuick
@@ -5,6 +6,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Services.Pipewire
+import Quickshell.Services.UPower
 
 Item {
     id: root
@@ -23,7 +25,7 @@ Item {
             visible: Config.options.bar.utilButtons.showScreenSnip
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
-                onClicked: Quickshell.execDetached(["qs", "-p", Quickshell.configPath("screenshot.qml")])
+                onClicked: Quickshell.execDetached(["qs", "-p", Quickshell.shellPath("screenshot.qml")])
                 MaterialSymbol {
                     horizontalAlignment: Qt.AlignHCenter
                     fill: 1
@@ -55,7 +57,7 @@ Item {
             visible: Config.options.bar.utilButtons.showKeyboardToggle
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
-                onClicked: Hyprland.dispatch("global quickshell:oskToggle")
+                onClicked: GlobalStates.oskOpen = !GlobalStates.oskOpen
                 MaterialSymbol {
                     horizontalAlignment: Qt.AlignHCenter
                     fill: 0
@@ -98,6 +100,39 @@ Item {
                     horizontalAlignment: Qt.AlignHCenter
                     fill: 0
                     text: Appearance.m3colors.darkmode ? "light_mode" : "dark_mode"
+                    iconSize: Appearance.font.pixelSize.large
+                    color: Appearance.colors.colOnLayer2
+                }
+            }
+        }
+
+        Loader {
+            active: Config.options.bar.utilButtons.showPerformanceProfileToggle
+            visible: Config.options.bar.utilButtons.showPerformanceProfileToggle
+            sourceComponent: CircleUtilButton {
+                Layout.alignment: Qt.AlignVCenter
+                onClicked: event => {
+                    if (PowerProfiles.hasPerformanceProfile) {
+                        switch(PowerProfiles.profile) {
+                            case PowerProfile.PowerSaver: PowerProfiles.profile = PowerProfile.Balanced
+                            break;
+                            case PowerProfile.Balanced: PowerProfiles.profile = PowerProfile.Performance
+                            break;
+                            case PowerProfile.Performance: PowerProfiles.profile = PowerProfile.PowerSaver
+                            break;
+                        }
+                    } else {
+                        PowerProfiles.profile = PowerProfiles.profile == PowerProfile.Balanced ? PowerProfile.PowerSaver : PowerProfile.Balanced
+                    }
+                }
+                MaterialSymbol {
+                    horizontalAlignment: Qt.AlignHCenter
+                    fill: 0
+                    text: switch(PowerProfiles.profile) {
+                        case PowerProfile.PowerSaver: return "energy_savings_leaf"
+                        case PowerProfile.Balanced: return "settings_slow_motion"
+                        case PowerProfile.Performance: return "local_fire_department"
+                    }
                     iconSize: Appearance.font.pixelSize.large
                     color: Appearance.colors.colOnLayer2
                 }

@@ -2,9 +2,8 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
-import "./aiChat/"
-import "root:/modules/common/functions/fuzzysort.js" as Fuzzy
 import qs.modules.common.functions
+import "./aiChat/"
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -47,6 +46,22 @@ Item {
             }
         },
         {
+            name: "tool",
+            description: Translation.tr("Set the tool to use for the model."),
+            execute: (args) => {
+                // console.log(args)
+                if (args.length == 0 || args[0] == "get") {
+                    Ai.addMessage(Translation.tr("Usage: %1tool TOOL_NAME").arg(root.commandPrefix), Ai.interfaceRole);
+                } else {
+                    const tool = args[0];
+                    const switched = Ai.setTool(tool);
+                    if (switched) {
+                        Ai.addMessage(Translation.tr("Tool set to: %1").arg(tool), Ai.interfaceRole);
+                    }
+                }
+            }
+        },
+        {
             name: "prompt",
             description: Translation.tr("Set the system prompt for the model."),
             execute: (args) => {
@@ -74,7 +89,7 @@ Item {
             execute: (args) => {
                 const joinedArgs = args.join(" ")
                 if (joinedArgs.trim().length == 0) {
-                    Ai.addMessage(`Usage: ${root.commandPrefix}save CHAT_NAME`, Ai.interfaceRole);
+                    Ai.addMessage(Translation.tr("Usage: %1save CHAT_NAME").arg(root.commandPrefix), Ai.interfaceRole);
                     return;
                 }
                 Ai.saveChat(joinedArgs)
@@ -86,7 +101,7 @@ Item {
             execute: (args) => {
                 const joinedArgs = args.join(" ")
                 if (joinedArgs.trim().length == 0) {
-                    Ai.addMessage(`Usage: ${root.commandPrefix}load CHAT_NAME`, Ai.interfaceRole);
+                    Ai.addMessage(Translation.tr("Usage: %1load CHAT_NAME").arg(root.commandPrefix), Ai.interfaceRole);
                     return;
                 }
                 Ai.loadChat(joinedArgs)
@@ -126,7 +141,7 @@ Mowe uwu wem ipsum!
 ### Formatting
 
 - *Italic*, \`Monospace\`, **Bold**, [Link](https://example.com)
-- Arch lincox icon <img src="${Quickshell.configPath("assets/icons/arch-symbolic.svg")}" height="${Appearance.font.pixelSize.small}"/>
+- Arch lincox icon <img src="${Quickshell.shellPath("assets/icons/arch-symbolic.svg")}" height="${Appearance.font.pixelSize.small}"/>
 
 ### Table
 
@@ -188,9 +203,75 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
         }
     }
 
+    component StatusItem: MouseArea {
+        id: statusItem
+        property string icon
+        property string statusText
+        property string description
+        hoverEnabled: true
+        implicitHeight: statusItemRowLayout.implicitHeight
+        implicitWidth: statusItemRowLayout.implicitWidth
+
+        RowLayout {
+            id: statusItemRowLayout
+            spacing: 0
+            MaterialSymbol {
+                text: statusItem.icon
+                iconSize: Appearance.font.pixelSize.huge
+                color: Appearance.colors.colSubtext
+            }
+            StyledText {
+                font.pixelSize: Appearance.font.pixelSize.small
+                text: statusItem.statusText
+                color: Appearance.colors.colSubtext
+            }
+        }
+
+        StyledToolTip {
+            content: statusItem.description
+            extraVisibleCondition: false
+            alternativeVisibleCondition: statusItem.containsMouse
+        }
+    }
+
+    component StatusSeparator: Rectangle {
+        implicitWidth: 4
+        implicitHeight: 4
+        radius: implicitWidth / 2
+        color: Appearance.colors.colOutlineVariant
+    }
+
     ColumnLayout {
         id: columnLayout
         anchors.fill: parent
+
+        RowLayout { // Status
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 10
+
+            StatusItem {
+                icon: Ai.currentModelHasApiKey ? "key" : "key_off"
+                statusText: ""
+                description: Ai.currentModelHasApiKey ? Translation.tr("API key is set\nChange with /key YOUR_API_KEY") : Translation.tr("No API key\nSet it with /key YOUR_API_KEY")
+            }
+            StatusSeparator {}
+            StatusItem {
+                icon: "device_thermostat"
+                statusText: Ai.temperature.toFixed(1)
+                description: Translation.tr("Temperature\nChange with /temp VALUE")
+            }
+            StatusSeparator {
+                visible: Ai.tokenCount.total > 0
+            }
+            StatusItem {
+                visible: Ai.tokenCount.total > 0
+                icon: "token"
+                statusText: Ai.tokenCount.total
+                description: Translation.tr("Total token count\nInput: %1\nOutput: %2")
+                    .arg(Ai.tokenCount.input)
+                    .arg(Ai.tokenCount.output)
+            }
+        }
 
         Item { // Messages
             Layout.fillWidth: true
@@ -200,6 +281,9 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                 anchors.fill: parent
                 spacing: 10
                 popin: false
+
+                touchpadScrollFactor: Config.options.interactions.scrolling.touchpadScrollFactor * 1.4
+                mouseScrollFactor: Config.options.interactions.scrolling.mouseScrollFactor * 1.4
 
                 property int lastResponseLength: 0
 
@@ -214,15 +298,6 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                 }
 
                 add: null // Prevent function calls from being janky
-
-                Behavior on contentY {
-                    NumberAnimation {
-                        id: scrollAnim
-                        duration: Appearance.animation.scroll.duration
-                        easing.type: Appearance.animation.scroll.type
-                        easing.bezierCurve: Appearance.animation.scroll.bezierCurve
-                    }
-                }
 
                 model: ScriptModel {
                     values: Ai.messageIDs.filter(id => {
@@ -457,6 +532,25 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                                     description: Translation.tr(`Load chat from %1`).arg(file.target),
                                 }
                             })
+                        } else if (messageInputField.text.startsWith(`${root.commandPrefix}tool`)) {
+                            root.suggestionQuery = messageInputField.text.split(" ")[1] ?? ""
+                            const toolResults = Fuzzy.go(root.suggestionQuery, Ai.availableTools.map(tool => {
+                                return {
+                                    name: Fuzzy.prepare(tool),
+                                    obj: tool,
+                                }
+                            }), {
+                                all: true,
+                                key: "name"
+                            })
+                            root.suggestionList = toolResults.map(tool => {
+                                const toolName = tool.target
+                                return {
+                                    name: `${messageInputField.text.trim().split(" ").length == 1 ? (root.commandPrefix + "tool ") : ""}${tool.target}`,
+                                    displayName: toolName,
+                                    description: Ai.toolDescriptions[toolName],
+                                }
+                            })
                         } else if(messageInputField.text.startsWith(root.commandPrefix)) {
                             root.suggestionQuery = messageInputField.text
                             root.suggestionList = root.allCommands.filter(cmd => cmd.name.startsWith(messageInputField.text.substring(1))).map(cmd => {
@@ -535,60 +629,41 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 5
-                anchors.leftMargin: 5
+                anchors.leftMargin: 10
                 anchors.rightMargin: 5
-                spacing: 5
+                spacing: 4
 
                 property var commandsShown: [
                     {
-                        name: "model",
+                        name: "",
                         sendDirectly: false,
-                    },
+                        dontAddSpace: true,
+                    }, 
                     {
                         name: "clear",
                         sendDirectly: true,
                     }, 
                 ]
 
-                Item {
-                    implicitHeight: providerRowLayout.implicitHeight + 5 * 2
-                    implicitWidth: providerRowLayout.implicitWidth + 10 * 2
-                    
-                    RowLayout {
-                        id: providerRowLayout
-                        anchors.centerIn: parent
+                ApiInputBoxIndicator { // Model indicator
+                    icon: "api"
+                    text: Ai.getModel().name
+                    tooltipText: Translation.tr("Current model: %1\nSet it with %2model MODEL")
+                        .arg(Ai.getModel().name)
+                        .arg(root.commandPrefix)
+                }
 
-                        MaterialSymbol {
-                            text: "api"
-                            iconSize: Appearance.font.pixelSize.large
-                        }
-                        StyledText {
-                            id: providerName
-                            font.pixelSize: Appearance.font.pixelSize.small
-                            color: Appearance.m3colors.m3onSurface
-                            elide: Text.ElideRight
-                            text: Ai.getModel().name
-                        }
-                    }
-                    StyledToolTip {
-                        id: toolTip
-                        extraVisibleCondition: false
-                        alternativeVisibleCondition: mouseArea.containsMouse // Show tooltip when hovered
-                        content: Translation.tr("Current model: %1\nSet it with %2model MODEL")
-                            .arg(Ai.getModel().name)
-                            .arg(root.commandPrefix)
-                    }
-
-                    MouseArea {
-                        id: mouseArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                    }
+                ApiInputBoxIndicator { // Tool indicator
+                    icon: "service_toolbox"
+                    text: Ai.currentTool.charAt(0).toUpperCase() + Ai.currentTool.slice(1)
+                    tooltipText: Translation.tr("Current tool: %1\nSet it with %2tool TOOL")
+                        .arg(Ai.currentTool)
+                        .arg(root.commandPrefix)
                 }
 
                 Item { Layout.fillWidth: true }
 
-                ButtonGroup {
+                ButtonGroup { // Command buttons
                     padding: 0
 
                     Repeater { // Command buttons
@@ -600,7 +675,7 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                                 if(modelData.sendDirectly) {
                                     root.handleInput(commandRepresentation)
                                 } else {
-                                    messageInputField.text = commandRepresentation + " "
+                                    messageInputField.text = commandRepresentation + (modelData.dontAddSpace ? "" : " ")
                                     messageInputField.cursorPosition = messageInputField.text.length
                                     messageInputField.forceActiveFocus()
                                 }
