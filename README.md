@@ -14,7 +14,7 @@ To install custom configs for my systems:
 ```bash
 cp custom/.config/hypr/custom/* ~/.config/hypr/custom/
 sed -i '/^source=~\/.config\/hypr\/hyprland\/rules.conf/ s|^|# |' ~/.config/hypr/hyprland.conf
-grep -qxF 'source=~/.config/hypr/custom/upstream-rules.conf' ~/.config/hypr/hyprland.conf || sed -i '/source=~\/.config\/hypr\/custom\/rules.conf/i source=~/.config/hypr/custom/upstream-rules.conf' ~/.config/hypr/hyprland.conf
+grep -qxF 'source=custom/upstream-rules.conf' ~/.config/hypr/hyprland.conf || sed -i '/source=custom\/rules.conf/i source=custom/upstream-rules.conf' ~/.config/hypr/hyprland.conf
 cp custom/.config/illogical-impulse/config.json ~/.config/illogical-impulse/config.json
 ```
 
