@@ -6,14 +6,14 @@ These are configs for my system and only intended to be used by me.
 Installation and update is the same as with upstream.
 Removals from this repo are still included, obviously.
 ```bash
-./install.sh
+./setup install
 ```
 
 To install custom configs for my systems:
 
 ```bash
 cp custom/.config/hypr/custom/* ~/.config/hypr/custom/
-sed -i '/^source=~\/.config\/hypr\/hyprland\/rules.conf/ s|^|# |' ~/.config/hypr/hyprland.conf
+sed -i '/^source=hyprland\/rules.conf/ s|^|# |' ~/.config/hypr/hyprland.conf
 grep -qxF 'source=custom/upstream-rules.conf' ~/.config/hypr/hyprland.conf || sed -i '/source=custom\/rules.conf/i source=custom/upstream-rules.conf' ~/.config/hypr/hyprland.conf
 cp custom/.config/illogical-impulse/config.json ~/.config/illogical-impulse/config.json
 ```
