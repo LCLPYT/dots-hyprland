@@ -16,6 +16,7 @@ hl.unbind("SUPER + C")
 hl.unbind("SUPER + ALT + E")
 hl.unbind("SUPER + V")
 hl.unbind("SUPER + E")
+hl.unbind("SUPER + Return")
 
 -- New binds
 hl.bind("SUPER + B", hl.dsp.exec_cmd("firefox"), {description = "Launch Firefox"})
@@ -24,6 +25,7 @@ hl.bind("Print", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | swappy -f -"), {descr
 hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | swappy -f -"), {description = "Screen snip >> edit"})
 hl.bind("SUPER + C", hl.dsp.exec_cmd("gnome-calculator"), {description = "Launch Calculator"})
 hl.bind("SUPER + E", hl.dsp.exec_cmd("nautilus"), {description = "Launch Nautilus"})
+hl.bind("SUPER + Return", hl.dsp.exec_cmd("kitty"), {description = "Launch Kitty"})
 
 -- Pass global keybinds to specific apps
 hl.bind("F7", function() hl.pass({ window = "class:^(discord)$" }) end)
