@@ -1,5 +1,5 @@
 -- opacity for all windows (overrides default no-opacity)
-hl.window_rule({match = {class = ".*"}, active_opacity = 0.89, inactive_opacity = 0.89})
+hl.window_rule({match = {class = ".*"}, opacity = "0.89 override 0.89 override"})
 
 -- re-enable blur for most windows (default rules.lua disables it globally)
 hl.window_rule({match = {class = ".*"}, no_blur = false})
@@ -7,7 +7,7 @@ hl.window_rule({match = {class = "^()$", title = "^()$"}, no_blur = true})
 
 -- gimp: no blur, full opacity
 hl.window_rule({match = {class = "gimp"}, no_blur = true})
-hl.window_rule({match = {class = "gimp"}, active_opacity = 1.0, inactive_opacity = 1.0})
+hl.window_rule({match = {class = "gimp"}, opacity = "1 override 1 override"})
 
 -- tearing
 hl.window_rule({match = {title = "Minecraft.*"}, immediate = true})
