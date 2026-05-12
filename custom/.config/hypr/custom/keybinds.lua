@@ -1,0 +1,31 @@
+-- Remove default binds being replaced or removed
+hl.unbind("SUPER + W")
+hl.unbind("SUPER + SHIFT + W")
+hl.unbind("SUPER + B")
+hl.unbind("SUPER + O")
+hl.unbind("SUPER + Slash")
+hl.unbind("Print")
+hl.unbind("CTRL + Print")
+hl.unbind("SUPER + SHIFT + S")
+hl.unbind("SUPER + ALT + R")
+hl.unbind("SUPER + SHIFT + ALT + R")
+hl.unbind("CTRL + ALT + R")
+hl.unbind("SUPER + T")
+hl.unbind("SUPER + Z")
+hl.unbind("SUPER + C")
+hl.unbind("SUPER + ALT + E")
+hl.unbind("SUPER + V")
+hl.unbind("SUPER + E")
+
+-- New binds
+hl.bind("SUPER + B", hl.dsp.exec_cmd("firefox"), {description = "Launch Firefox"})
+hl.bind("SUPER + H", hl.dsp.global("quickshell:cheatsheetToggle"), {description = "Toggle cheatsheet"})
+hl.bind("Print", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | swappy -f -"), {description = "Screen snip >> edit"})
+hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("grim -g \"$(slurp)\" - | swappy -f -"), {description = "Screen snip >> edit"})
+hl.bind("SUPER + C", hl.dsp.exec_cmd("gnome-calculator"), {description = "Launch Calculator"})
+hl.bind("SUPER + E", hl.dsp.exec_cmd("nautilus"), {description = "Launch Nautilus"})
+
+-- Pass global keybinds to specific apps
+hl.bind("F7", function() hl.pass({ window = "class:^(discord)$" }) end)
+hl.bind("F8", function() hl.pass({ window = "class:^(com\\.discordapp\\.Discord)$" }) end)
+hl.bind("F9", function() hl.pass({ window = "class:^(com\\.obsproject\\.Studio)$" }) end)
