@@ -8,7 +8,9 @@ hl.env("NVD_BACKEND", "direct")
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "wayland")
 
 hl.env("QT_QPA_PLATFORMTHEME", "kde")
-hl.env("SSH_AUTH_SOCK", "$XDG_RUNTIME_DIR/gcr/ssh")
+hl.env("SSH_AUTH_SOCK", os.getenv("XDG_RUNTIME_DIR") .. "/gcr/ssh")
 
 -- fix broken hotkeys in Minecraft
 hl.env("XMODIFIERS", "@im=none")
+
+hl.env("EDITOR", "nvim")

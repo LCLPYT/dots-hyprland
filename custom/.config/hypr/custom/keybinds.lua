@@ -28,6 +28,7 @@ hl.bind("SUPER + E", hl.dsp.exec_cmd("nautilus"), {description = "Launch Nautilu
 hl.bind("SUPER + Return", hl.dsp.exec_cmd("kitty"), {description = "Launch Kitty"})
 
 -- Pass global keybinds to specific apps
-hl.bind("F7", function() hl.pass({ window = "class:^(discord)$" }) end)
-hl.bind("F8", function() hl.pass({ window = "class:^(com\\.discordapp\\.Discord)$" }) end)
-hl.bind("F9", function() hl.pass({ window = "class:^(com\\.obsproject\\.Studio)$" }) end)
+hl.bind("F7", hl.dsp.pass({ window = "class:^(discord)$" }))
+hl.bind("F8", hl.dsp.pass({ window = "class:^(com\\.discordapp\\.Discord)$" }))
+hl.bind("F9", hl.dsp.pass({ window = "class:^(com\\.obsproject\\.Studio)$" }))
+
