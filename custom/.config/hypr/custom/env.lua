@@ -1,6 +1,7 @@
 hl.env("LIBVA_DRIVER_NAME", "nvidia")
 hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
 hl.env("NVD_BACKEND", "direct")
+hl.env("__GL_SHADER_DISK_CACHE_SIZE", "12000000000")
 
 -- hl.env("GDK_SCALE", "2")
 -- hl.env("XCURSOR_SIZE", "32")
