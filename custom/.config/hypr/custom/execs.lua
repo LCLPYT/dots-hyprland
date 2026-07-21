@@ -10,7 +10,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("pkill gammastep")
 
     -- remove clipboard manager
-    hl.exec_cmd("pkill wl-paste")
+    hl.exec_cmd("sleep 5 && pkill wl-paste")
 
     -- move cursor to workspace 1
     hl.exec_cmd("hyprctl dispatch workspace 1")
